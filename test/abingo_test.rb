@@ -226,4 +226,66 @@ class AbingoTest < ActiveSupport::TestCase
     assert_equal({}, Abingo.participating_tests)
   end
 
+  test "tests still work after cache cleared" do
+    test_name = "cache_clearing_test"
+    Abingo.test(test_name, %w{a b c})
+    Abingo.bingo!(test_name)
+
+    Rails.cache.clear
+
+    Abingo.identity = "new identity"
+    Abingo.test(test_name, %w{a b c})
+    Abingo.bingo!(test_name)
+
+    ex = Abingo::Experiment.find_by_test_name(test_name)
+    assert_equal 2, ex.participants
+    assert_equal 2, ex.conversions
+  end
+
+  test "tests still work after cache cleared when conversion specified" do
+    test_name = "cache_clearing_test"
+    conversion_name = "alt_conversion"
+    Abingo.test(test_name, %w{a b c}, :conversion => conversion_name)
+    Abingo.bingo!(conversion_name)
+
+    Rails.cache.clear
+
+    Abingo.identity = "new identity"
+    Abingo.test(test_name, %w{a b c}, :conversion => conversion_name)
+    Abingo.bingo!(conversion_name)
+
+    ex = Abingo::Experiment.find_by_test_name(test_name)
+    assert_equal 2, ex.participants
+    assert_equal 2, ex.conversions
+  end
+
+  test "short circuiting works if cache cleared" do
+    test_name = "short_circuit_test_cache"
+    conversion_name = test_name
+    alt_picked = Abingo.test(test_name, %w{A B}, :conversion => conversion_name)
+    ex = Abingo::Experiment.find_by_test_name(test_name)
+    alt_not_picked = (%w{A B} - [alt_picked]).first
+
+    ex.end_experiment!(alt_not_picked, conversion_name)
+
+    ex.reload
+    Rails.cache.clear
+
+    Abingo.bingo!(test_name)  #Should not be counted, test is over.
+    assert_equal 0, ex.conversions
+
+    old_identity = Abingo.identity
+    Abingo.identity = "shortCircuitTestNewIdentity"
+    Abingo.test(test_name, %w{A B}, :conversion => conversion_name)
+    Abingo.identity = old_identity
+    ex.reload
+    assert_equal 1, ex.participants  #Original identity counted, new identity not counted b/c test stopped
+
+    100.times do |i|
+      Abingo.identity = "consistent#{i}"
+      assert_equal alt_not_picked, Abingo.test(test_name, %w{A B}, :conversion => conversion_name)
+    end
+  end
+
+  #chosen alternative
 end
