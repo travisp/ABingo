@@ -133,7 +133,7 @@ class AbingoTest < ActiveSupport::TestCase
         1
       end
     end
-    sleep(10)
+    threads.each { |t| t.join }
     assert_equal 1, Abingo::Experiment.count_by_sql(["select count(id) from experiments where test_name = ?", test_name])
   end
 
