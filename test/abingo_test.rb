@@ -129,7 +129,7 @@ class AbingoTest < ActiveSupport::TestCase
     threads = []
     5.times do
       threads << Thread.new do
-        Abingo.test(test_name, alternatives, conversion_name)
+        Abingo.test(test_name, alternatives, :conversion => conversion_name)
         1
       end
     end
