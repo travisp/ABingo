@@ -132,7 +132,7 @@ class AbingoTest < ActiveSupport::TestCase
     ex.reload
     assert_equal "Finished", ex.status
     
-    Abingo.bingo!(test_name)  #Should not be counted, test is over.
+    Abingo.bingo!(conversion_name)  #Should not be counted, test is over.
     assert_equal 0, ex.conversions
 
     old_identity = Abingo.identity
