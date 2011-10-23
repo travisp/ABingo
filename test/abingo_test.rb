@@ -45,6 +45,15 @@ class AbingoTest < ActiveSupport::TestCase
     end
   end
 
+  test "alternatives not picked consistently for different identities" do
+    alternatives_picked = []
+    100.times do |i|
+      Abingo.identity = "inconsistent#{i}"
+      alternatives_picked << Abingo.test("inconsistency_test", 1..2)
+    end
+    assert_equal 2, alternatives_picked.uniq.count
+  end
+
   test "participation works" do
     new_tests = %w{participationA participationB participationC}
     new_tests.map do |test_name|
@@ -67,6 +76,19 @@ class AbingoTest < ActiveSupport::TestCase
     chosen_alt = Abingo::Alternative.find_by_lookup(lookup)
     assert_equal 1, ex.participants
     assert_equal 1, chosen_alt.participants
+  end
+
+  test "multiple participants counted" do
+    test_name = "participants_counted_test"
+    Abingo.test(test_name, %w{a b c})
+    Abingo.bingo!(test_name)
+    Abingo.identity = "new identity"
+    Abingo.test(test_name, %w{a b c})
+    Abingo.bingo!(test_name)
+
+    ex = Abingo::Experiment.find_by_test_name(test_name)
+    assert_equal 2, ex.participants
+    assert_equal 2, ex.conversions
   end
 
   test "conversion tracking by test name" do
@@ -119,6 +141,21 @@ class AbingoTest < ActiveSupport::TestCase
     Abingo.identity = old_identity
     ex.reload
     assert_equal 1, ex.participants  #Original identity counted, new identity not counted b/c test stopped
+  end
+
+  test "short circuiting always returns consistent result for new identities" do
+    conversion_name = "purchase"
+    test_name = "short circuit test"
+    alt_picked = Abingo.test(test_name, %w{A B}, :conversion => conversion_name)
+    ex = Abingo::Experiment.find_by_test_name(test_name)
+    alt_not_picked = (%w{A B} - [alt_picked]).first
+
+    ex.end_experiment!(alt_not_picked, conversion_name)
+
+    100.times do |i|
+      Abingo.identity = "consistent#{i}"
+      assert_equal alt_not_picked, Abingo.test(test_name, %w{A B}, :conversion => conversion_name)
+    end
   end
 
   test "proper experiment creation in high concurrency" do
