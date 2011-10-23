@@ -1,11 +1,12 @@
 require 'test_helper'
-
 class AbingoTest < ActiveSupport::TestCase
 
-  #Wipes cache, D/B prior to doing a test run.
-  Abingo.cache.clear
-  Abingo::Experiment.delete_all
-  Abingo::Alternative.delete_all
+  def setup
+    #Wipes cache, database prior to doing a test run.
+    Abingo.cache.clear
+    Abingo::Experiment.delete_all
+    Abingo::Alternative.delete_all
+  end
 
   test "identity automatically assigned" do
     assert Abingo.identity != nil
