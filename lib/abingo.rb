@@ -84,19 +84,18 @@ class Abingo
       creation_required = true
 
       #this prevents (most) repeated creations of experiments in high concurrency environments.
-      if Abingo.cache.exist?(lock_key)
-        while Abingo.cache.exist?(lock_key)
+      unless Abingo.cache.write(lock_key, 1, :expires_in => 5.seconds, :unless_exist => true)
+        while !Abingo.cache.write(lock_key, 1, :expires_in => 5.seconds, :unless_exist => true)
           sleep(0.1)
         end
         creation_required = !(Abingo::Experiment.exists?(test_name))
       end
 
       if creation_required
-        Abingo.cache.write(lock_key, 1, :expires_in => 5.seconds)
         conversion_name = options[:conversion] || options[:conversion_name]
         Abingo::Experiment.start_experiment!(test_name, self.parse_alternatives(alternatives), conversion_name)
-        Abingo.cache.delete(lock_key)
       end
+      Abingo.cache.delete(lock_key)
     end
 
     choice = self.find_alternative_for_user(test_name, alternatives)
