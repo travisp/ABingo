@@ -85,11 +85,10 @@ class Abingo
 
       #this prevents (most) repeated creations of experiments in high concurrency environments.
       if Abingo.cache.exist?(lock_key)
-        creation_required = false
         while Abingo.cache.exist?(lock_key)
           sleep(0.1)
         end
-        creation_required = Abingo::Experiment.exists?(test_name)
+        creation_required = !(Abingo::Experiment.exists?(test_name))
       end
 
       if creation_required
