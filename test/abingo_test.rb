@@ -6,6 +6,9 @@ class AbingoTest < ActiveSupport::TestCase
     Abingo.cache.clear
     Abingo::Experiment.delete_all
     Abingo::Alternative.delete_all
+
+    #Reset options
+    Abingo.options = {}
   end
 
   test "identity automatically assigned" do
