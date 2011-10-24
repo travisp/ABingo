@@ -78,8 +78,11 @@ class Abingo
     unless short_circuit.nil?
       return short_circuit  #Test has been stopped, pick canonical alternative.
     end
-    
-    unless Abingo::Experiment.exists?(test_name)
+
+    #test if exists in cache first because Abingo::Experiment.exists? will add to cache
+    exists_in_cache = Abingo::Experiment.exists_in_cache?(test_name)
+    unless exists_in_cache || Abingo::Experiment.exists?(test_name)
+      #does not exist in cache or db
       lock_key = "Abingo::lock_for_creation(#{test_name.gsub(" ", "_")})"
       creation_required = true
 
@@ -96,6 +99,12 @@ class Abingo
         Abingo::Experiment.start_experiment!(test_name, self.parse_alternatives(alternatives), conversion_name)
       end
       Abingo.cache.delete(lock_key)
+    else
+      #existing in database, but not cache
+      if !exists_in_cache
+        conversion_name = options[:conversion] || options[:conversion_name]
+        Abingo::Experiment.continue_experiment!(test_name, self.parse_alternatives(alternatives), conversion_name)
+      end
     end
 
     choice = self.find_alternative_for_user(test_name, alternatives)

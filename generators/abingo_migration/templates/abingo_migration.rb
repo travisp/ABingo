@@ -5,6 +5,7 @@ class AbingoMigration<%= version -%> < ActiveRecord::Migration
     create_table "experiments", :force => true do |t|
       t.string "test_name"
       t.string "status"
+      t.string "final_alternative"
       t.timestamps
     end
 

@@ -243,7 +243,7 @@ class AbingoTest < ActiveSupport::TestCase
   end
 
   test "tests still work after cache cleared when conversion specified" do
-    test_name = "cache_clearing_test"
+    test_name = "cache_clearing_test_with_conversion"
     conversion_name = "alt_conversion"
     Abingo.test(test_name, %w{a b c}, :conversion => conversion_name)
     Abingo.bingo!(conversion_name)
@@ -287,5 +287,4 @@ class AbingoTest < ActiveSupport::TestCase
     end
   end
 
-  #chosen alternative
 end
