@@ -107,6 +107,7 @@ class Abingo::Experiment < ActiveRecord::Base
       has_identical_alternatives =
         (alternative_lookups & experiment.alternatives.map(&:lookup)).size == alternatives_array.size
       if has_identical_alternatives
+        #continue the experiment since the alternatives are the same
         tests_listening_to_conversion = Abingo.cache.read("Abingo::tests_listening_to_conversion#{conversion_name}") || []
         tests_listening_to_conversion += [test_name] unless tests_listening_to_conversion.include? test_name
         Abingo.cache.write("Abingo::tests_listening_to_conversion#{conversion_name}", tests_listening_to_conversion)
@@ -118,6 +119,15 @@ class Abingo::Experiment < ActiveRecord::Base
             experiment.final_alternative
           )
         end
+      elsif experiment.final_alternative
+        #if experiment finished, just reset short_circuit cache
+        Abingo.cache.write(
+          "Abingo::Experiment::short_circuit(#{test_name})".gsub(" ", "_"),
+          experiment.final_alternative
+        )
+      else
+        #blow it all away and start again because new alternatives chosen
+        self.start_experiment!(test_name, alternatives_array, conversion_name)
       end
     end
   end
