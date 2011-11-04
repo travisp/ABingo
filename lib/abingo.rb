@@ -51,11 +51,11 @@ class Abingo
   #always see the same alternative for a particular test which is past the login
   #screen.  For details and usage notes, see the docs.
   def self.identity=(new_identity)
-    @@identity = new_identity.to_s
+    @identity = new_identity.to_s
   end
 
   def self.identity
-    @@identity ||= rand(10 ** 10).to_i.to_s
+    @identity ||= rand(10 ** 10).to_i.to_s
   end
 
   #A simple convenience method for doing an A/B test.  Returns true or false.
