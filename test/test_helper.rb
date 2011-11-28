@@ -32,3 +32,9 @@ else
   require 'active_support/test_case'
 end
 
+module Test::Unit::Assertions
+  def assert_false(object, message="")
+    assert_equal(false, object, message)
+  end
+end
+

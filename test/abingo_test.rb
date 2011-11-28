@@ -1,11 +1,15 @@
 require 'test_helper'
-
 class AbingoTest < ActiveSupport::TestCase
 
-  #Wipes cache, D/B prior to doing a test run.
-  Abingo.cache.clear
-  Abingo::Experiment.delete_all
-  Abingo::Alternative.delete_all
+  def setup
+    #Wipes cache, database prior to doing a test run.
+    Abingo.cache.clear
+    Abingo::Experiment.delete_all
+    Abingo::Alternative.delete_all
+
+    #Reset options
+    Abingo.options = {}
+  end
 
   test "identity automatically assigned" do
     assert Abingo.identity != nil
@@ -125,11 +129,11 @@ class AbingoTest < ActiveSupport::TestCase
     threads = []
     5.times do
       threads << Thread.new do
-        Abingo.test(test_name, alternatives, conversion_name)
+        Abingo.test(test_name, alternatives, :conversion => conversion_name)
         1
       end
     end
-    sleep(10)
+    threads.each { |t| t.join }
     assert_equal 1, Abingo::Experiment.count_by_sql(["select count(id) from experiments where test_name = ?", test_name])
   end
 
