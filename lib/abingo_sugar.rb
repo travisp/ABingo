@@ -34,7 +34,7 @@ module AbingoSugar
       a = params[:a].to_i
       b = params[:b].to_i
       c = params[:c].to_i
-      if (request.method == :post && (a + b == c))
+      if (request.post? && (a + b == c))
         Abingo.human!
       else
         textual_result = "0"
