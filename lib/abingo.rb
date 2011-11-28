@@ -271,10 +271,9 @@ class Abingo
   end
 
   def self.score_conversion!(test_name)
-    test_name.gsub!(" ", "_")
     participating_tests = Abingo.cache.read("Abingo::participating_tests::#{Abingo.identity}") || []
     if options[:assume_participation] || participating_tests.include?(test_name)
-      cache_key = "Abingo::conversions(#{Abingo.identity},#{test_name}"
+      cache_key = "Abingo::conversions(#{Abingo.identity},#{test_name}".gsub(" ", "_")
       if options[:multiple_conversions] || !Abingo.cache.read(cache_key)
         if !options[:count_humans_only] || Abingo.is_human?
           Abingo::Alternative.score_conversion(test_name)

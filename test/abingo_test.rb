@@ -110,6 +110,7 @@ class AbingoTest < ActiveSupport::TestCase
   test "conversion tracking by conversion name" do
     conversion_name = "purchase"
     tests = %w{conversionTrackingByConversionNameA conversionTrackingByConversionNameB conversionTrackingByConversionNameC}
+    tests << "Test With Spaces"
     tests.map do |test_name|
       Abingo.test(test_name, %w{A B}, :conversion => conversion_name)
     end
