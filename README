@@ -1,4 +1,16 @@
-A/Bingo Version 1.0.3
+A/Bingo Version 1.0.3 - travisp Fork
+======
+travisp Fork changes
+
+Bug fixes:
+- Fix the ability to set users as human in Rails 3
+- Fix the ability to use spaces in test name that prevented conversion scoring
+- Fix up and add to unit tests
+- Fix a bug that would incorrectly determine if experiment creation was required
+
+Also, improves high concurrency handling by setting the memcache custom lock key via the "add"
+method instead of the "set" method.
+
 ======
 
 Rails A/B testing.  One minute to install.  One line to set up a new A/B test.
